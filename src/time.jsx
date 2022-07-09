@@ -14,6 +14,7 @@ import {
   isTimeInDisabledRange,
   isTimeDisabled,
   timesToInjectAfter,
+  dateTimeToTime,
 } from "./date_utils";
 
 export default class Time extends React.Component {
@@ -37,6 +38,7 @@ export default class Time extends React.Component {
     includeTimes: PropTypes.array,
     intervals: PropTypes.number,
     selected: PropTypes.instanceOf(Date),
+    selectedTime: PropTypes.instanceOf(Date),
     openToDate: PropTypes.instanceOf(Date),
     onChange: PropTypes.func,
     timeClassName: PropTypes.func,
@@ -143,7 +145,7 @@ export default class Time extends React.Component {
     const format = this.props.format ? this.props.format : "p";
     const intervals = this.props.intervals;
 
-    const base = getStartOfDay(newDate(this.props.selected));
+    const base = getStartOfDay(this.props.selectedTime || dateTimeToTime(this.props.selected));
     const multiplier = 1440 / intervals;
     const sortedInjectTimes =
       this.props.injectTimes &&
@@ -152,7 +154,7 @@ export default class Time extends React.Component {
       });
 
     const activeDate =
-      this.props.selected || this.props.openToDate || newDate();
+      this.props.selectedTime || dateTimeToTime(this.props.selected || this.props.openToDate || newDate());
     const currH = getHours(activeDate);
     const currM = getMinutes(activeDate);
     const activeTime = setHours(setMinutes(base, currM), currH);

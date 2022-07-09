@@ -40,12 +40,17 @@ import {
   getDefaultLocale,
   DEFAULT_YEAR_ITEM_NUMBER,
   isSameDay,
+  dateTimeToTime,
+  setDateTimeFromDate,
+  setDateTimeFromString,
+  setDateTimeFromHHMM,
 } from "./date_utils";
 import onClickOutside from "react-onclickoutside";
 
 export { default as CalendarContainer } from "./calendar_container";
 
 export { registerLocale, setDefaultLocale, getDefaultLocale };
+export { dateTimeToTime, setDateTimeFromDate, setDateTimeFromString, setDateTimeFromHHMM, safeDateFormat };
 
 const outsideClickIgnoreClass = "react-datepicker-ignore-onclickoutside";
 const WrappedCalendar = onClickOutside(Calendar);
@@ -214,6 +219,7 @@ export default class DatePicker extends React.Component {
     scrollableYearDropdown: PropTypes.bool,
     scrollableMonthYearDropdown: PropTypes.bool,
     selected: PropTypes.instanceOf(Date),
+    selectedTime: PropTypes.instanceOf(Date),
     selectsEnd: PropTypes.bool,
     selectsStart: PropTypes.bool,
     selectsRange: PropTypes.bool,
@@ -492,6 +498,14 @@ export default class DatePicker extends React.Component {
       this.props.strictParsing,
       this.props.minDate
     );
+
+    if (date) {
+      let selectedTime = setDateTimeFromString(dateTimeToTime(date), event.target.value);
+      if (selectedTime) {
+        this.props.selectedTime = selectedTime
+      }
+    }
+
     // Use date from `selected` prop when manipulating only time for input value
     if (
       this.props.showTimeSelectOnly &&
@@ -643,14 +657,16 @@ export default class DatePicker extends React.Component {
     this.setState({
       preSelection: changedDate,
     });
+    this.props.selectedTime = time
 
-    this.props.onChange(changedDate);
+    this.props.onChange(changedDate, null, time);
     if (this.props.shouldCloseOnSelect) {
       this.setOpen(false);
     }
     if (this.props.showTimeInput) {
       this.setOpen(true);
     }
+
     this.setState({ inputValue: null });
   };
 
@@ -880,6 +896,7 @@ export default class DatePicker extends React.Component {
         formatWeekDay={this.props.formatWeekDay}
         dropdownMode={this.props.dropdownMode}
         selected={this.props.selected}
+        selectedTime={this.props.selectedTime}
         preSelection={this.state.preSelection}
         onSelect={this.handleSelect}
         onWeekSelect={this.props.onWeekSelect}

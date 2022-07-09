@@ -156,6 +156,7 @@ export default class Calendar extends React.Component {
     scrollableMonthYearDropdown: PropTypes.bool,
     preSelection: PropTypes.instanceOf(Date),
     selected: PropTypes.instanceOf(Date),
+    selectedTime: PropTypes.instanceOf(Date),
     selectsEnd: PropTypes.bool,
     selectsStart: PropTypes.bool,
     selectsRange: PropTypes.bool,
@@ -933,6 +934,7 @@ export default class Calendar extends React.Component {
       return (
         <Time
           selected={this.props.selected}
+          selectedTime={this.props.selectedTime}
           openToDate={this.props.openToDate}
           onChange={this.props.onTimeChange}
           timeClassName={this.props.timeClassName}

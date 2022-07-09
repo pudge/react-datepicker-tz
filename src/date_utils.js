@@ -26,6 +26,7 @@ import getTime from "date-fns/getTime";
 import setSeconds from "date-fns/setSeconds";
 import setMinutes from "date-fns/setMinutes";
 import setHours from "date-fns/setHours";
+import setDate from "date-fns/setDate";
 import setMonth from "date-fns/setMonth";
 import setQuarter from "date-fns/setQuarter";
 import setYear from "date-fns/setYear";
@@ -63,6 +64,45 @@ export const DEFAULT_YEAR_ITEM_NUMBER = 12;
 var longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
 
 // ** Date Constructors **
+
+// return Date, but set to June 1, so we have consistent times (no DST influence)
+export function dateTimeToTime(dirtyDateTime) {
+  return setMonth(setDate(dirtyDateTime, 1), 5) // 5=June
+}
+
+// return Date with set hours/minutes
+export function setDateTimeFromHHMM(dirtyDateTime, hours, minutes) {
+  return setHours(setMinutes(dirtyDateTime, minutes), hours);
+}
+
+// return Date with set hours/minutes
+export function setDateTimeFromDate(dirtyDateTime, dateTime) {
+  return setHours(setMinutes(dirtyDateTime, getMinutes(dateTime)), getHours(dateTime));
+}
+
+// return Date with set hours/minutes
+export function setDateTimeFromString(dirtyDateTime, dateStr) {
+  var matches = dateStr.match(/[T ](\d\d?):(\d\d)(:\d\d)?(\s*[AP. ]+?[M. ]+)?/i);
+  if (matches) {
+    var hours = parseInt(matches[1]);
+    var minutes = parseInt(matches[2]);
+    if (Number.isInteger(hours) && Number.isInteger(minutes)) {
+      var ampm = matches[3];
+      if (ampm) {
+        var pm = ampm.match(/P/i) ? true : false;
+        if (hours == 12) {
+          hours = 0;
+          pm = !pm;
+        }
+        if (pm) {
+          hours += 12;
+        }
+      }
+      return setHours(setMinutes(dirtyDateTime, minutes), hours);
+    }
+  }
+  return dirtyDateTime;
+}
 
 export function newDate(value) {
   const d = value
@@ -162,16 +202,32 @@ export function formatDate(date, formatStr, locale) {
   });
 }
 
-export function safeDateFormat(date, { dateFormat, locale }) {
-  return (
-    (date &&
-      formatDate(
-        date,
-        Array.isArray(dateFormat) ? dateFormat[0] : dateFormat,
-        locale
-      )) ||
-    ""
-  );
+export function safeDateFormat(date, props) {
+  const dateFormat = props.dateFormat
+  const locale = props.locale
+  const time = props.selectedTime
+
+  if (date) {
+    var format = Array.isArray(dateFormat) ? dateFormat[0] : dateFormat;
+    if (time) {
+      var matches = dateFormat.match(/^(.+)('T'| )([Hhms:]+(\s*aa)?.*?)$/i);
+      if (matches) {
+        var dFormat = matches[1];
+        var tFormat = matches[3];
+        var sep = matches[2] == "'T'" ? 'T' : ' ';
+
+        var d = formatDate(date, dFormat, locale);
+        var t = formatDate(time, tFormat, locale);
+        return d + sep + t;
+      }
+    }
+    else {
+      return formatDate(date, format, locale);
+    }
+  }
+  else {
+    return "";
+  }
 }
 
 export function safeDateRangeFormat(startDate, endDate, props) {
