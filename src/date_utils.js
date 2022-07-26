@@ -221,13 +221,9 @@ export function safeDateFormat(date, props) {
         return d + sep + t;
       }
     }
-    else {
-      return formatDate(date, format, locale);
-    }
+    return formatDate(date, format, locale);
   }
-  else {
-    return "";
-  }
+  return "";
 }
 
 export function safeDateRangeFormat(startDate, endDate, props) {
