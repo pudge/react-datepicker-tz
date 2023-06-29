@@ -487,6 +487,9 @@ export default class DatePicker extends React.Component {
         return;
       }
     }
+    if (event.target.value.length===0) {
+      event.target.value = " "
+    }
     this.setState({
       inputValue: event.target.value,
       lastPreSelectChange: PRESELECT_CHANGE_VIA_INPUT,
